@@ -114,6 +114,7 @@ def calcular_in_irn(alpha, theta, beta):
 alphas = np.arange(0, 180, 1)  
 thetas = np.arange(0, 95, 5)  
 #thetas = [89.5,89.9]
+#thetas = 10, 50
 
 # Almacenar resultados para las gráficas
 gamma_values = {theta: [] for theta in thetas}
@@ -133,7 +134,10 @@ fig1, ax1 = plt.subplots(figsize=(16, 10))
 fig1.subplots_adjust(left=0.04, right=0.99, top=0.97, bottom=0.05)
 for theta in thetas:
     ax1.plot(alphas, gamma_values[theta], label=f'θ = {theta}°')
-ax1.set_title('Alpha vs Gamma')
+ax1.set_title('Alpha vs Gamma', loc='center')
+ax1.annotate('Autores: Marco A. Calderón M. y Alejandro Morales H.', 
+             xy=(1, 1), xycoords='axes fraction', 
+             fontsize=12, ha='right', va='bottom')
 ax1.set_xlabel('Alpha (degrees)')
 ax1.set_ylabel('Gamma (degrees)')
 ax1.legend()
@@ -152,7 +156,10 @@ fig2, ax2 = plt.subplots(figsize=(10, 6))
 fig2.subplots_adjust(left=0.04, right=0.99, top=0.97, bottom=0.05)
 for theta in thetas:
     ax2.plot(alphas, IN_values[theta], label=f'θ = {theta}°')
-ax2.set_title('Alpha vs IN')
+ax2.set_title('Alpha vs IN', loc='center')
+ax2.annotate('Autores: Marco A. Calderón M. y Alejandro Morales H.', 
+             xy=(1, 1), xycoords='axes fraction', 
+             fontsize=12, ha='right', va='bottom')
 ax2.set_xlabel('Alpha (degrees)')
 ax2.set_ylabel('IN (A)')
 ax2.legend()
@@ -172,7 +179,10 @@ fig3, ax3 = plt.subplots(figsize=(10, 6))
 fig3.subplots_adjust(left=0.04, right=0.99, top=0.97, bottom=0.05)
 for theta in thetas:
     ax3.plot(alphas, IRN_values[theta], label=f'θ = {theta}°')
-ax3.set_title('Alpha vs IRN')
+ax3.set_title('Alpha vs IRN', loc='center')
+ax3.annotate('Autores: Marco A. Calderón M. y Alejandro Morales H.', 
+             xy=(1, 1), xycoords='axes fraction', 
+             fontsize=12, ha='right', va='bottom')
 ax3.set_xlabel('Alpha (degrees)')
 ax3.set_ylabel('IRN (A)')
 ax3.legend()

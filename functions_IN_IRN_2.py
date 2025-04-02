@@ -83,16 +83,16 @@ def get_Current_Parameters(alpha, theta, beta, deg, i_b, sign_type):
     
     if R_L == float('inf'):
         i_t_temp[limit_indices] = i_b * np.sin(w * t[limit_indices])
-        i_t_temp[limit_indices_2] = i_b * np.sin(w * t[limit_indices_2]) if sign_type == 2 else 0
+        if sign_type == 2:
+            i_t_temp[limit_indices_2] = i_b * np.sin(w * t[limit_indices_2])
     else:
         i_t_temp[limit_indices] = (
-            i_b * (np.sin(w * t[limit_indices] - theta_rad) - 
-                    np.sin(alpha_rad - theta_rad) * np.exp((-R_L) * (w * t[limit_indices] - alpha_rad) / w))
+            i_b * (np.sin(w * t[limit_indices] - theta_rad) - np.sin(alpha_rad - theta_rad) * np.exp((-R_L) * (w * t[limit_indices] - alpha_rad) / w))
         )
-        i_t_temp[limit_indices_2] = (
-            i_b * (np.sin(w * t[limit_indices_2] - theta_rad) - 
-                    np.sin(alpha_rad - theta_rad) * np.exp((-R_L) * (w * t[limit_indices_2] - alpha_rad) / w))
-        ) if sign_type == 2 else 0
+        if sign_type == 2:
+            i_t_temp[limit_indices_2] = (
+                i_b * (np.sin(w * t[limit_indices_2] - theta_rad) - np.sin(alpha_rad - theta_rad) * np.exp((-R_L) * (w * t[limit_indices_2] - alpha_rad) / w))
+            )
         
         
     # Índices para alpha y beta
@@ -139,7 +139,9 @@ def get_Voltage_Parameters(alpha, beta, deg, Vmax, sign_type):
     limit_indices_ak_2 = (deg >= 360 + alpha) if beta < 180 + alpha else (deg >= 360 + alpha)
     
     v_t_temp[limit_indices] = (Vmax-v_ak)*np.sin(w * t[limit_indices])
-    v_t_temp[limit_indices_2] = (Vmax-v_ak)*-np.sin(w * t[limit_indices_2]) if sign_type == 2 else 0
+    
+    if sign_type == 2:
+        v_t_temp[limit_indices_2] = (Vmax-v_ak)*-np.sin(w * t[limit_indices_2]) 
     
     v_ak_temp[limit_indices_ak] = Vmax * np.sin(w * t[limit_indices_ak])
     v_ak_temp[limit_indices] = v_ak 
@@ -202,7 +204,7 @@ def plot_volts(deg, i_t, v_t, v_ak_t, alpha, beta, gamma, Vmax):
     cursor = mplcursors.cursor(hover=True)
     cursor.connect("add", lambda sel: sel.annotation.set_text(f"({sel.target[0]:.2f}, {sel.target[1]:.2f})"))
 
-    #plot_lines(alpha, beta, gamma, i_t)
+    plot_lines(alpha, beta, gamma, i_t)
     
     # Grafica de Voltaje de la carga
     plt.subplot(3, 1, 2) 
@@ -225,7 +227,7 @@ def plot_volts(deg, i_t, v_t, v_ak_t, alpha, beta, gamma, Vmax):
     cursor2 = mplcursors.cursor(hover=True)
     cursor2.connect("add", lambda sel: sel.annotation.set_text(f"({sel.target[0]:.2f}, {sel.target[1]:.2f})"))
     
-    #plot_lines(alpha, beta, gamma, v_t)
+    plot_lines(alpha, beta, gamma, v_t)
     
     # Grafica de Voltaje entre terminales
     plt.subplot(3, 1, 3) 
@@ -248,7 +250,7 @@ def plot_volts(deg, i_t, v_t, v_ak_t, alpha, beta, gamma, Vmax):
     cursor3 = mplcursors.cursor(hover=True)
     cursor3.connect("add", lambda sel: sel.annotation.set_text(f"({sel.target[0]:.2f}, {sel.target[1]:.2f})"))
     
-    #plot_lines(alpha, beta, gamma, v_ak_t)
+    plot_lines(alpha, beta, gamma, v_ak_t)
 
     plt.tight_layout()
     
