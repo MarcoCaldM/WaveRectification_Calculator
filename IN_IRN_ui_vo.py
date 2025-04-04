@@ -1,4 +1,4 @@
-from functions_IN_IRN_2 import get_Beta, get_Current_Parameters, get_Voltage_Parameters, plot_gamma, plot_IN, plot_IRN,plot_volts
+from functions_IN_IRN_2 import get_Beta, get_Theta, get_Current_Parameters, get_Voltage_Parameters, plot_gamma, plot_IN, plot_IRN,plot_volts
 import numpy as np
 import tkinter as tk
 from tkinter import ttk
@@ -175,10 +175,9 @@ def calculate_values():
             beta_prom = float(beta_entry.get())
             R = float(R_entry.get())
             Vmax = float(Vmax_entry.get())
-            
-            theta = beta_prom - alpha
+            theta = get_Theta(alpha, beta_prom)
             gamma_prom = beta_prom - alpha
-            L = np.tan(np.deg2rad(theta)) / (R*2*np.pi*f)
+            L = (R*np.tan(np.deg2rad(theta))) / (2*np.pi*f)
             Z = np.sqrt(pow(R,2)+pow(w*L,2))
             i_b = Vmax/Z
             R_L = R/L
@@ -199,7 +198,7 @@ def calculate_values():
         vo_avg, vo_rms, v_t, v_ak_t = get_Voltage_Parameters(alpha, beta_prom, deg, Vmax, sign_type)
         
         # Actualiza los labels de los resultados
-        L_label_res.config(text=f"{(L*100):.2f} mH") if mode == 3 else L_label_res.config(text="...")
+        L_label_res.config(text=f"{(L*1000):.2f} mH") if mode == 3 else L_label_res.config(text="...")
         theta_label_res.config(text=f"{theta:.2f} grados")
         beta_label_res.config(text=f"{beta_prom:.2f} grados")
         gamma_label_res.config(text=f"{gamma_prom:.2f} grados")

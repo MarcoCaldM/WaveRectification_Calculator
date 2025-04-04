@@ -64,8 +64,6 @@ def calcular_Beta(alpha, theta):
     return beta_prom, gamma_prom
 
 # Función de cálculo de i_n e i_{rn}
-import numpy as np
-
 def calcular_in_irn(alpha, theta, beta):
     # Inicializar la lista de corriente con ceros
     i_t_temp = np.zeros(len(deg))
@@ -108,7 +106,6 @@ def calcular_in_irn(alpha, theta, beta):
     i_rn = io_rms / i_b
 
     return i_n, i_rn
-
 
 # Valores de alpha y theta
 alphas = np.arange(0, 180, 1)  

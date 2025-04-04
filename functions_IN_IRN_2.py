@@ -61,6 +61,30 @@ def get_Beta(alpha, theta):
 
     return beta_prom, gamma_prom
 
+def get_Theta(alpha, beta_obj):
+    global flag_R
+    theta_def = None
+    err_def = float('inf')
+    
+    theta_min = max(0 , beta_obj - 180 - 15)
+    theta_max = min(90, beta_obj - 180 + 15)
+    
+    for theta in np.arange (theta_min,theta_max,0.01):
+        if theta == 90:
+            flag_R = 1
+            
+        beta, _ = get_Beta(alpha, theta)
+        err = abs(beta - beta_obj)
+        
+        if err < err_def:
+            err_def = err
+            theta_def = theta
+        
+        if err < 0.01:
+            break
+    
+    return theta_def
+
 def get_Current_Parameters(alpha, theta, beta, deg, i_b, sign_type):
     # Inicializar la lista de corriente con ceros
     i_t_temp = np.zeros(len(deg))
@@ -84,14 +108,14 @@ def get_Current_Parameters(alpha, theta, beta, deg, i_b, sign_type):
     if R_L == float('inf'):
         i_t_temp[limit_indices] = i_b * np.sin(w * t[limit_indices])
         if sign_type == 2:
-            i_t_temp[limit_indices_2] = i_b * np.sin(w * t[limit_indices_2])
+            i_t_temp[limit_indices_2] = -i_b * np.sin(w * t[limit_indices_2])
     else:
         i_t_temp[limit_indices] = (
             i_b * (np.sin(w * t[limit_indices] - theta_rad) - np.sin(alpha_rad - theta_rad) * np.exp((-R_L) * (w * t[limit_indices] - alpha_rad) / w))
         )
         if sign_type == 2:
             i_t_temp[limit_indices_2] = (
-                i_b * (np.sin(w * t[limit_indices_2] - theta_rad) - np.sin(alpha_rad - theta_rad) * np.exp((-R_L) * (w * t[limit_indices_2] - alpha_rad) / w))
+                -i_b * (np.sin(w * t[limit_indices_2] - theta_rad) - np.sin(alpha_rad - theta_rad) * np.exp((-R_L) * (w * t[limit_indices_2] - alpha_rad) / w))
             )
         
         
