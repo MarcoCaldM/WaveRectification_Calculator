@@ -61,29 +61,47 @@ def get_Beta(alpha, theta):
 
     return beta_prom, gamma_prom
 
-def get_Theta(alpha, beta_obj):
-    global flag_R
-    theta_def = None
-    err_def = float('inf')
+def get_Theta(alpha, beta):
     
-    theta_min = max(0 , beta_obj - 180 - 15)
-    theta_max = min(90, beta_obj - 180 + 15)
+    if beta == 180:
+        return 0
+    if beta == 360 - alpha:
+        return 90
     
-    for theta in np.arange (theta_min,theta_max,0.01):
-        if theta == 90:
-            flag_R = 1
-            
-        beta, _ = get_Beta(alpha, theta)
-        err = abs(beta - beta_obj)
-        
-        if err < err_def:
-            err_def = err
-            theta_def = theta
-        
-        if err < 0.01:
-            break
+    beta_rad = np.deg2rad(beta)
+    alpha_rad = np.deg2rad(alpha)
     
-    return theta_def
+    # Generar valores de theta
+    theta_min = max(0 , beta - 180 - 15)
+    theta_max = min(90, beta - 180 + 15)
+    theta_vals_deg = np.arange(theta_min, theta_max, 0.01)
+    theta_vals = np.deg2rad(theta_vals_deg)
+    theta_vals_tan = np.tan(theta_vals)
+    
+    valid_indices = np.where(np.abs(theta_vals_tan) > 1e-3)[0]
+    theta_vals = theta_vals[valid_indices]
+    theta_vals_tan = theta_vals_tan[valid_indices]
+    
+    # Calcular los términos en un solo paso
+    term1 = np.sin(beta_rad - theta_vals)
+    term2 = np.sin(alpha_rad - theta_vals) * np.exp((-w / theta_vals_tan) * (beta_rad - alpha_rad) / w)
+    
+    # Encontrar índices donde la diferencia es menor que la tolerancia
+    tolerance = 1e-2
+    theta_indices = np.where(np.abs(term1 - term2) < tolerance)[0]
+    
+    theta_rad = theta_vals[theta_indices]
+    theta_deg = []
+    
+    if len(theta_rad) > 0:
+        for theta in theta_rad:
+            theta_deg_temp = np.rad2deg(theta)
+            theta_deg.append(theta_deg_temp)
+            print(theta_deg_temp)
+
+    theta_prom = np.mean(theta_deg) if theta_deg else 0
+    
+    return theta_prom
 
 def get_Current_Parameters(alpha, theta, beta, deg, i_b, sign_type):
     # Inicializar la lista de corriente con ceros

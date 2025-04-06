@@ -401,8 +401,11 @@ autor1_label.grid(row=24, column=0, padx=10, sticky="w")
 autor2_label = tk.Label(root, text="Marco A. Calderón M.", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 12))
 autor2_label.grid(row=24, column=1, padx=10, sticky="w")
 
-autor2_label = tk.Label(root, text="Alejandro Morales H.", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 12))
-autor2_label.grid(row=25, column=1, padx=10, sticky="w")
+autor3_label = tk.Label(root, text="Alejandro Morales H.", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 12))
+autor3_label.grid(row=25, column=1, padx=10, sticky="w")
+
+institucion_label = tk.Label(root, text="Intituto Tecnológico de Chihuahua", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 12))
+institucion_label.grid(row=26, column=1, padx=10, sticky="w")
 # ComboBox del modo
 op_CB_1 = {
     "R y L" : 1,
