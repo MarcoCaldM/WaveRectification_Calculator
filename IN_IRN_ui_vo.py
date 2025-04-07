@@ -88,7 +88,7 @@ def update_fields():
         Z_label.config(fg="#b7b7b7") 
 
 def change_Graph():
-    global canvas   # Necesaria
+    global canvas, deg   # Necesaria
     
     # Elige el tipo de gráfica
     txt_selected = grafica_combo.get()
@@ -179,6 +179,7 @@ def calculate_values():
             gamma_prom = beta_prom - alpha
             L = (R*np.tan(np.deg2rad(theta))) / (2*np.pi*f)
             Z = np.sqrt(pow(R,2)+pow(w*L,2))
+            
             i_b = Vmax/Z
             R_L = R/L
         
@@ -228,7 +229,7 @@ def calculate_values():
         
     except Exception as e:
         error_message = traceback.format_exc()
-        #error_label.config(text=f"Error: {e}\nDetalles:\n{error_message}")
+        error_label.config(text=f"Error: {e}\nDetalles:\n{error_message}")
 
 
 # ------------------------------------------------------------
@@ -254,7 +255,7 @@ match [screen_width, screen_height]:
     case [3840, 2160]: 
         fig_width, fig_height = [20, 14]
     case _:
-        fig_width, fig_height = [10, 7] 
+        fig_width, fig_height = [7.5, 6.5] 
 
 root.configure(bg="#f0f0f0")  
 estilo = ttk.Style()
@@ -280,29 +281,29 @@ font_settings = ('Century Gothic', 14)
 
 # Labels
 alpha_label = tk.Label(root, text="Alpha (grados):", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 12))
-alpha_label.grid(row=4, column=0, padx=10, pady=2)
+alpha_label.grid(row=4, column=0, padx=10, pady=1)
 alpha_entry = ttk.Entry(root, textvariable=alpha_var, font=font_settings)
-alpha_entry.grid(row=4, column=1, padx=10, pady=2)
+alpha_entry.grid(row=4, column=1, padx=10, pady=1)
 
 theta_label = tk.Label(root, text="Theta (grados):", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 12))
-theta_label.grid(row=5, column=0, padx=10, pady=2)
+theta_label.grid(row=5, column=0, padx=10, pady=1)
 theta_entry = ttk.Entry(root, textvariable=theta_var, font=font_settings)
-theta_entry.grid(row=5, column=1, padx=10, pady=2)
+theta_entry.grid(row=5, column=1, padx=10, pady=1)
 
 beta_label = tk.Label(root, text="β (grados):", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 12))
-beta_label.grid(row=6, column=0, padx=10, pady=2)
+beta_label.grid(row=6, column=0, padx=10, pady=1)
 beta_entry = ttk.Entry(root, textvariable= beta_var, font=font_settings)
-beta_entry.grid(row=6, column=1, padx=10, pady=2)
+beta_entry.grid(row=6, column=1, padx=10, pady=1)
 
 R_label = tk.Label(root, text="Resistencia (Ω):", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 12))
-R_label.grid(row=7, column=0, padx=10, pady=2)
+R_label.grid(row=7, column=0, padx=10, pady=1)
 R_entry = ttk.Entry(root, textvariable=R_var, font=font_settings)
-R_entry.grid(row=7, column=1, padx=10, pady=2)
+R_entry.grid(row=7, column=1, padx=10, pady=1)
 
 L_label = tk.Label(root, text="Inductancia (mH):", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 12))
-L_label.grid(row=8, column=0, padx=10, pady=2)
+L_label.grid(row=8, column=0, padx=10, pady=1)
 L_entry = ttk.Entry(root, textvariable=L_var, font=font_settings)
-L_entry.grid(row=8, column=1, padx=10, pady=2)
+L_entry.grid(row=8, column=1, padx=10, pady=1)
 
 Vmax_label = tk.Label(root, text="Vmax (V):", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 12))
 Vmax_label.grid(row=9, column=0, padx=10, pady=2)
@@ -324,7 +325,7 @@ style = ttk.Style()
 
 # Estilo para las etiquetas de resultados
 style.configure("Modern.TLabel", 
-                background="#f4f2b9",  
+                background="#f4f2b9",
                 foreground="#000000",  
                 font=("Century Gothic", 12, "bold"), 
                 padding=(10, 2),
@@ -417,7 +418,7 @@ tk.Label(root, text="Modo:", bg="#f0f0f0", fg="#404040", font=("Century Gothic",
 
 mode_combo = ttk.Combobox(root, textvariable=mode_var, values=list(op_CB_1.keys()), state="readonly", font=font_settings, text='')
 mode_combo.set("R y L")
-mode_combo.grid(row=2, column=1, padx=10, pady=10)
+mode_combo.grid(row=2, column=1, padx=10, pady=1)
 mode_combo.bind("<<ComboboxSelected>>", lambda e: update_fields())
 
 
@@ -432,24 +433,24 @@ op_CB_2 = {
 
 tk.Label(root, text="Gráfica:", bg="#f0f0f0", fg="#404040", font=("Century Gothic", 16)).grid(row=12, column=0, padx=10, pady=10)
 grafica_combo = ttk.Combobox(root, textvariable=grafica_var, values=list(op_CB_2.keys()), state="readonly", font=font_settings)
-grafica_combo.grid(row=12, column=1, padx=10, pady=10)
+grafica_combo.grid(row=12, column=1, padx=10, pady=1)
 grafica_combo.set("Ninguna")
 grafica_combo.grid_remove()  # Esconde el combo box al inicio
 grafica_combo.bind("<<ComboboxSelected>>", lambda e: change_Graph())
 
 #Radio button para la selección del tipo de rectificación
 radio_halfwave_singlephase = tk.Radiobutton(root, text="Media onda monofásico", variable=rectification_type, value=1)
-radio_halfwave_singlephase.grid(row=0, column=0, padx=5, pady=5)
+radio_halfwave_singlephase.grid(row=0, column=0, padx=5, pady=1)
 radio_halfwave_singlephase.select()
 
 radio_fullwave_singlephase = tk.Radiobutton(root, text="Onda completa monofásico", variable=rectification_type, value=2)
-radio_fullwave_singlephase.grid(row=1, column=0, padx=5, pady=5)
+radio_fullwave_singlephase.grid(row=1, column=0, padx=5, pady=1)
 
 radio_halfwave_threephase = tk.Radiobutton(root, text="Media onda trifásico", variable=rectification_type, value=3)
-radio_halfwave_threephase.grid(row=0, column=1, padx=5, pady=5)
+radio_halfwave_threephase.grid(row=0, column=1, padx=5, pady=1)
 
 radio_fullwave_threephase = tk.Radiobutton(root, text="Onda completa trifásico", variable=rectification_type, value=4)
-radio_fullwave_threephase.grid(row=1, column=1, padx=5, pady=5)
+radio_fullwave_threephase.grid(row=1, column=1, padx=5, pady=1)
 # Iniciar con el modo predeterminado
 update_fields()
 

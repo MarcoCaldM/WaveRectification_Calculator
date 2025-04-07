@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import mplcursors
+from functools import reduce
 
 # Parámetros constantes
 T = 2 * np.pi
@@ -62,7 +63,6 @@ def get_Beta(alpha, theta):
     return beta_prom, gamma_prom
 
 def get_Theta(alpha, beta):
-    
     if beta == 180:
         return 0
     if beta == 360 - alpha:
@@ -74,7 +74,7 @@ def get_Theta(alpha, beta):
     # Generar valores de theta
     theta_min = max(0 , beta - 180 - 15)
     theta_max = min(90, beta - 180 + 15)
-    theta_vals_deg = np.arange(theta_min, theta_max, 0.01)
+    theta_vals_deg = np.arange(theta_min, theta_max, 0.001)
     theta_vals = np.deg2rad(theta_vals_deg)
     theta_vals_tan = np.tan(theta_vals)
     
@@ -87,7 +87,7 @@ def get_Theta(alpha, beta):
     term2 = np.sin(alpha_rad - theta_vals) * np.exp((-w / theta_vals_tan) * (beta_rad - alpha_rad) / w)
     
     # Encontrar índices donde la diferencia es menor que la tolerancia
-    tolerance = 1e-2
+    tolerance = 1e-3
     theta_indices = np.where(np.abs(term1 - term2) < tolerance)[0]
     
     theta_rad = theta_vals[theta_indices]
@@ -119,50 +119,84 @@ def get_Current_Parameters(alpha, theta, beta, deg, i_b, sign_type):
     alpha_rad = np.deg2rad(alpha)
     theta_rad = np.deg2rad(theta)
 
-    # Calcular i_t_temp usando vectorización
-    limit_indices = (deg >= alpha) & (deg <= beta) 
-    limit_indices_2 = (deg >= alpha + 180) & (deg <= beta + 180) 
-    
-    if R_L == float('inf'):
-        i_t_temp[limit_indices] = i_b * np.sin(w * t[limit_indices])
-        if sign_type == 2:
-            i_t_temp[limit_indices_2] = -i_b * np.sin(w * t[limit_indices_2])
-    else:
-        i_t_temp[limit_indices] = (
-            i_b * (np.sin(w * t[limit_indices] - theta_rad) - np.sin(alpha_rad - theta_rad) * np.exp((-R_L) * (w * t[limit_indices] - alpha_rad) / w))
-        )
-        if sign_type == 2:
-            i_t_temp[limit_indices_2] = (
-                -i_b * (np.sin(w * t[limit_indices_2] - theta_rad) - np.sin(alpha_rad - theta_rad) * np.exp((-R_L) * (w * t[limit_indices_2] - alpha_rad) / w))
-            )
-        
-        
-    # Índices para alpha y beta
-    alpha_index = np.searchsorted(deg, alpha)
-    beta_index = np.searchsorted(deg, beta)
-    alpha_pi_index = np.searchsorted(deg, alpha + 180)
+    sin_term = np.sin(w*t - theta_rad)
+    exp_term = np.exp((-R_L) * (w*t - alpha_rad)/w) if R_L != float("inf") else 1
+    base_term = np.sin(alpha_rad - theta_rad) * exp_term
 
-    # Calcular io_avg e io_rms usando integración numérica
-    if alpha_index + 1 < beta_index:
-        if beta < 180 + alpha:
-            x = np.deg2rad(deg[alpha_index + 1:beta_index] - deg[alpha_index:beta_index - 1]) / T 
-            io_avg = np.sum(x * (i_t_temp[alpha_index:beta_index - 1] + i_t_temp[alpha_index + 1:beta_index]) / 2)    
-            y_rms = (i_t_temp[alpha_index:beta_index - 1] ** 2 + i_t_temp[alpha_index + 1:beta_index] ** 2) / 2
-            io_rms = np.sqrt(np.sum(x * y_rms))
+    values_1 = np.zeros_like(deg)
+    values_2 = np.zeros_like(deg)
+
+    limit_indices = (deg >= alpha) & (deg <= beta)
+        
+    if sign_type == 1:
+        i_t_temp[limit_indices] = i_b * (sin_term[limit_indices] - base_term[limit_indices])
+        
+        # Índices para alpha y beta
+        alpha_index = np.searchsorted(deg, alpha)
+        beta_index = np.searchsorted(deg, beta)
+        alpha_pi_index = np.searchsorted(deg, alpha + 180)
+
+        # Calcular io_avg e io_rms usando integración numérica
+        if alpha_index + 1 < beta_index:
+            if beta < 180 + alpha:
+                x = np.deg2rad(deg[alpha_index + 1:beta_index] - deg[alpha_index:beta_index - 1]) / T 
+                io_avg = np.sum(x * (i_t_temp[alpha_index:beta_index - 1] + i_t_temp[alpha_index + 1:beta_index]) / 2)    
+                y_rms = (i_t_temp[alpha_index:beta_index - 1] ** 2 + i_t_temp[alpha_index + 1:beta_index] ** 2) / 2
+                io_rms = np.sqrt(np.sum(x * y_rms))
+            else:
+                x = np.deg2rad(deg[alpha_index + 1:alpha_pi_index] - deg[alpha_index:alpha_pi_index - 1]) / T
+                io_avg = np.sum(x * (i_t_temp[alpha_index:alpha_pi_index - 1] + i_t_temp[alpha_index + 1:alpha_pi_index]) / 2)    
+                y_rms = (i_t_temp[alpha_index:alpha_pi_index - 1] ** 2 + i_t_temp[alpha_index + 1:alpha_pi_index] ** 2) / 2
+                io_rms = np.sqrt(np.sum(x * y_rms))
         else:
-            x = np.deg2rad(deg[alpha_index + 1:alpha_pi_index] - deg[alpha_index:alpha_pi_index - 1]) / T
-            io_avg = np.sum(x * (i_t_temp[alpha_index:alpha_pi_index - 1] + i_t_temp[alpha_index + 1:alpha_pi_index]) / 2)    
-            y_rms = (i_t_temp[alpha_index:alpha_pi_index - 1] ** 2 + i_t_temp[alpha_index + 1:alpha_pi_index] ** 2) / 2
-            io_rms = np.sqrt(np.sum(x * y_rms))
-    else:
+            io_avg = 0
+            io_rms = 0
+            
+        #Calcular corrientes normalizadas
+        i_n = io_avg / i_b
+        i_rn = io_rms / i_b
+    
+    elif sign_type == 2:
+        values_1[limit_indices] = i_b * (sin_term[limit_indices] - base_term[limit_indices])
+         
+        shift = int(180/0.01)
+        values_2 = np.roll(values_1, shift)
+        i_t_temp = np.maximum(values_1, values_2)
+            
+        i_n = 0 
+        i_rn = 0
         io_avg = 0
         io_rms = 0
-        
-
-    # Calcular corrientes normalizadas
-    i_n = io_avg / i_b
-    i_rn = io_rms / i_b
-
+    
+    elif sign_type == 3:
+        values_1[limit_indices] = i_b * (sin_term[limit_indices] - base_term[limit_indices])
+         
+        shift = int(120/0.01)
+        values_2 = np.roll(values_1, shift)
+        values_3 = np.roll(values_2, shift)
+        i_t_temp = reduce(np.maximum, [values_1, values_2, values_3])
+            
+        i_n = 0 
+        i_rn = 0
+        io_avg = 0
+        io_rms = 0
+    
+    elif sign_type == 4:
+        values_1[limit_indices] = i_b * (sin_term[limit_indices] - base_term[limit_indices])
+         
+        shift = int(60/0.01)
+        values_2 = np.roll(values_1, shift)
+        values_3 = np.roll(values_2, shift)
+        values_4 = np.roll(values_3, shift)
+        values_5 = np.roll(values_4, shift)
+        values_6 = np.roll(values_5, shift)
+        i_t_temp = reduce(np.maximum, [values_1, values_2, values_3, values_4, values_5, values_6])
+            
+        i_n = 0 
+        i_rn = 0
+        io_avg = 0
+        io_rms = 0
+          
     return io_avg, io_rms, i_n, i_rn, i_t_temp
 
 def get_Voltage_Parameters(alpha, beta, deg, Vmax, sign_type):
